@@ -24,6 +24,7 @@ yarn-error.log*
 # OS / IDE
 .DS_Store
 Thumbs.db
+__MACOSX/
 *.swp
 .vscode/
 .idea/
