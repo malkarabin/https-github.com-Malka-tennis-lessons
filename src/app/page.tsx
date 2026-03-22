@@ -125,6 +125,7 @@ export default function HomePage() {
               <>
                 <Link href="/player/schedule">המערכת של המאמן</Link>
                 <Link href="/player/schedule?view=recurring">שיעורים חוזרים</Link>
+                <Link href="/player/ask">שאלה למאמן</Link>
               </>
             )}
             <button type="button" className="btn btn-sm" onClick={signOut}>

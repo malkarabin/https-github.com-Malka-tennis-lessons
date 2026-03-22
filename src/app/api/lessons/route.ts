@@ -31,6 +31,9 @@ export async function POST(request: Request) {
     );
   }
   const lessonStart = new Date(body.start);
+  if (lessonStart.getTime() < Date.now()) {
+    return NextResponse.json({ error: "לא ניתן לקבוע שיעור בתאריך או שעה שעברו." }, { status: 400 });
+  }
   const lessonEnd = new Date(lessonStart.getTime() + 60 * 60 * 1000);
   const rangeStart = new Date(lessonStart.getTime() - 60 * 60 * 1000);
   const rangeEnd = new Date(lessonEnd.getTime() + 60 * 60 * 1000);

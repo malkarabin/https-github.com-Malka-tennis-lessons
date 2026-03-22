@@ -164,6 +164,7 @@ export default function PlayerSchedulePage() {
       <nav className="nav">
         <span className="nav-title">{playerName} — המערכת של המאמן שלי ({coachName || "…"})</span>
         <div className="nav-links">
+          <Link href="/player/ask">שאלה למאמן</Link>
           <Link href="/">דף הבית</Link>
         </div>
       </nav>
@@ -324,8 +325,9 @@ export default function PlayerSchedulePage() {
       {viewMode === "week" && (
         <WeeklySchedule
           coachId={coachId}
+          playerId={playerId ?? undefined}
           players={players}
-          canAddLesson={false}
+          canAddLesson={true}
           scheduleRefreshKey={scheduleRefreshKey}
         />
       )}

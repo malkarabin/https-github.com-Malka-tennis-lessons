@@ -40,17 +40,16 @@ Multi-coach tennis lesson scheduling: each coach has a dedicated list of players
 
 ---
 
-## PHASE 3 — Payments (Stripe)
-**Goal:** Integrate payment for lessons (Stripe or similar).
+## PHASE 3 — Payments (Morning) + optional LLM Q&A
+**Goal:** Integrate payment for lessons via **Morning** (מורנינג / Green Invoice ecosystem), and optionally let **students ask the coach** questions via an **LLM assistant** (OpenAI-compatible API).
 
-- Payment flow: pay per lesson or per batch (e.g. monthly pack), as defined in Phase 3 architecture.
-- Connect to Stripe (Checkout, Payment Intents, or link); no refunds automation in v1.
-- Payment state linked to lesson/slot (e.g. pending, paid).
+- Payment flow: pay per lesson (per Phase 3 architecture); webhook/callback for paid state.
+- **LLM add-on:** Players use `/player/ask`; server validates player↔coach; answers in Hebrew with disclaimers. Configure `OPENAI_API_KEY` — see `docs/env-llm.md`.
 
-**Outcome:** Lessons can be paid for via Stripe; schedule or list view reflects payment status where needed.
+**Outcome:** Lessons can be paid via Morning; schedule reflects payment status; players can get AI-assisted answers about tennis/scheduling (not a substitute for the coach on sensitive topics).
 
 ---
 
 ## Phase pointer
-Current phase: **PHASE=1** (see team-Yuri/PHASE.md).
-Progression: complete Phase 1 → validation → PHASE=2 → Phase 2 → … → PHASE=3.
+Current phase: see **team-Yuri/PHASE.md** — **Phase 2.5** (LLM student Q&A) before **Phase 3** (Morning payments).
+Progression: Phase 1 → 2 → **2.5 (LLM)** → 3 (payments).

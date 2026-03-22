@@ -1,5 +1,7 @@
 # Manager Plan — Phase 3: Payment integration (Morning)
 
+**Prerequisite:** Phase 2 complete; **Phase 2.5 (LLM)** may be completed in parallel or already done — see `manager-phase2-5-llm.md`.
+
 ## Phase Goal
 Integrate **Morning** (מורנינג) so the coach can collect payment per lesson. One coach; pay per lesson; payment confirmation is **automatic** via Morning callback/webhook (no manual "I paid" checkbox). The system stores payment status and shows it in the schedule and in lists.
 
@@ -22,6 +24,8 @@ Integrate **Morning** (מורנינג) so the coach can collect payment per less
 
 5. **M5 — Documentation and configuration**
    - Document how to configure Morning (credentials, webhook URL). Environment variables or config for Morning API key / webhook secret. Devlog and optional docs for running with Morning (sandbox/production).
+
+**Student Q&A (LLM)** is **Phase 2.5**, not part of Phase 3 milestones — see `manager-phase2-5-llm.md`.
 
 ---
 

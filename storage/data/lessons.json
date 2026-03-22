@@ -215,5 +215,54 @@
     "playerId": "p-1773521401805",
     "start": "2026-03-17T06:00:00.000Z",
     "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774124758074-p2",
+    "coachId": "c1",
+    "playerId": "p2",
+    "start": "2026-03-24T10:00:00.000Z",
+    "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774125317466-p2",
+    "coachId": "c1",
+    "playerId": "p2",
+    "start": "2026-03-25T09:00:00.000Z",
+    "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774125458936-p2",
+    "coachId": "c1",
+    "playerId": "p2",
+    "start": "2026-04-01T09:00:00.000Z",
+    "durationMinutes": 60
+  },
+  {
+    "id": "l-1774125945742",
+    "coachId": "c1",
+    "playerId": "p2",
+    "start": "2026-04-01T08:00:00.000Z",
+    "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774126152465-p2",
+    "coachId": "c1",
+    "playerId": "p2",
+    "start": "2026-03-23T14:00:00.000Z",
+    "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774128361502-p-1773608743704",
+    "coachId": "יוסי-חן-mms8ubg8",
+    "playerId": "p-1773608743704",
+    "start": "2026-03-17T11:00:00.000Z",
+    "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774131014635-p-1773509412044",
+    "coachId": "c1",
+    "playerId": "p-1773509412044",
+    "start": "2026-03-22T09:00:00.000Z",
+    "durationMinutes": 60
   }
 ]

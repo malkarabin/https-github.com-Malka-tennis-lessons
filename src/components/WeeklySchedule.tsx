@@ -138,7 +138,9 @@ export default function WeeklySchedule({
   const visibleLessons = lessons.filter((l) => players.some((p) => p.id === l.playerId));
 
   const createLesson = () => {
-    if (!adding || !addPlayerId) return;
+    if (!adding) return;
+    const effectivePlayerId = playerId ?? addPlayerId;
+    if (!effectivePlayerId) return;
     setAddLessonError(null);
     const d = new Date(weekStartDate);
     d.setDate(d.getDate() + adding.dayIndex);
@@ -150,7 +152,7 @@ export default function WeeklySchedule({
       body: JSON.stringify({
         id: `l-${Date.now()}`,
         coachId,
-        playerId: addPlayerId,
+        playerId: effectivePlayerId,
         start,
         durationMinutes: 60,
       }),
@@ -288,16 +290,18 @@ export default function WeeklySchedule({
                     {isAdding && (
                       <div className="schedule-add">
                         {addLessonError && <p className="form-error">{addLessonError}</p>}
-                        <select
-                          value={addPlayerId}
-                          onChange={(e) => setAddPlayerId(e.target.value)}
-                          size={1}
-                        >
-                          <option value="">שחקן...</option>
-                          {players.map((p) => (
-                            <option key={p.id} value={p.id}>{p.name}</option>
-                          ))}
-                        </select>
+                        {!playerId && (
+                          <select
+                            value={addPlayerId}
+                            onChange={(e) => setAddPlayerId(e.target.value)}
+                            size={1}
+                          >
+                            <option value="">שחקן...</option>
+                            {players.map((p) => (
+                              <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                          </select>
+                        )}
                         <button type="button" className="btn btn-sm btn-primary" onClick={createLesson}>הוסף (שעה)</button>
                         <button type="button" className="btn btn-sm" onClick={() => setAdding(null)}>ביטול</button>
                       </div>

@@ -705,3 +705,90 @@ input:focus, select:focus {
   flex-wrap: wrap;
 }
 .recurring-list-item .btn-sm { flex-shrink: 0; }
+
+/* Player — ask coach (LLM) */
+.player-ask-card {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.player-chat-log {
+  min-height: 200px;
+  max-height: min(55vh, 420px);
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+.player-chat-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 1rem;
+}
+.player-chat-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  max-width: 92%;
+  margin-bottom: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  line-height: 1.45;
+}
+.player-chat-bubble-user {
+  align-self: flex-end;
+  align-items: flex-end;
+  background: rgba(143, 185, 150, 0.25);
+  border: 1px solid rgba(143, 185, 150, 0.45);
+}
+.player-chat-bubble-assistant {
+  align-self: flex-start;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.player-chat-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.player-chat-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.95rem;
+}
+.player-chat-typing {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.player-chat-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+@media (min-width: 520px) {
+  .player-chat-input-row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+  .player-chat-textarea {
+    flex: 1;
+  }
+}
+.player-chat-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+.player-chat-send {
+  flex-shrink: 0;
+}

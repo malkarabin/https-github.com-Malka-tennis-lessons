@@ -306,5 +306,49 @@
     "endConditionValue": "current",
     "startDate": "2026-03-18",
     "createdAt": "2026-03-15T22:29:51.614Z"
+  },
+  {
+    "id": "rec-1774125231278",
+    "coachId": "c1",
+    "playerId": "p2",
+    "weekday": 0,
+    "hour": 10,
+    "endConditionType": "afterN",
+    "endConditionValue": 4,
+    "startDate": "2026-03-22",
+    "createdAt": "2026-03-21T20:33:51.491Z"
+  },
+  {
+    "id": "rec-1774125994997",
+    "coachId": "c1",
+    "playerId": "p2",
+    "weekday": 0,
+    "hour": 10,
+    "endConditionType": "afterN",
+    "endConditionValue": 3,
+    "startDate": "2026-03-22",
+    "createdAt": "2026-03-21T20:46:35.099Z"
+  },
+  {
+    "id": "rec-1774126054511",
+    "coachId": "c1",
+    "playerId": "p2",
+    "weekday": 1,
+    "hour": 10,
+    "endConditionType": "afterN",
+    "endConditionValue": 2,
+    "startDate": "2026-03-23",
+    "createdAt": "2026-03-21T20:47:34.521Z"
+  },
+  {
+    "id": "rec-1774126060998",
+    "coachId": "c1",
+    "playerId": "p2",
+    "weekday": 1,
+    "hour": 12,
+    "endConditionType": "afterN",
+    "endConditionValue": 2,
+    "startDate": "2026-03-23",
+    "createdAt": "2026-03-21T20:47:41.010Z"
   }
 ]

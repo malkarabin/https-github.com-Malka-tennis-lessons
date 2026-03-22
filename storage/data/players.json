@@ -130,5 +130,65 @@
     "coachId": "יוסי-חן-mms8ubg8",
     "name": "מלכה דרי",
     "color": "#b8e8d4"
+  },
+  {
+    "id": "p-1774128284294",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "name": "רותם רבין",
+    "color": "#b5d6b2"
+  },
+  {
+    "id": "p-1774128288361",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "name": "ירדן",
+    "color": "#a8d4e6"
+  },
+  {
+    "id": "p-1774128292245",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "name": "עדי",
+    "color": "#f2c4b8"
+  },
+  {
+    "id": "p-1774128296333",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "name": "סיגל",
+    "color": "#c9b8e8"
+  },
+  {
+    "id": "p-1774128300451",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "name": "שוקי",
+    "color": "#ffe5b4"
+  },
+  {
+    "id": "p-1774129019771",
+    "coachId": "צבי-mms9iml4",
+    "name": "נופר",
+    "color": "#b5d6b2"
+  },
+  {
+    "id": "p-1774129030285",
+    "coachId": "צבי-mms9iml4",
+    "name": "ענבר",
+    "color": "#a8d4e6"
+  },
+  {
+    "id": "p-1774129112453",
+    "coachId": "צבי-mms9iml4",
+    "name": "עדי",
+    "color": "#f2c4b8"
+  },
+  {
+    "id": "p-1774129118669",
+    "coachId": "צבי-mms9iml4",
+    "name": "יעל",
+    "color": "#c9b8e8"
+  },
+  {
+    "id": "p-1774129122335",
+    "coachId": "צבי-mms9iml4",
+    "name": "נטע",
+    "color": "#ffe5b4"
   }
 ]
