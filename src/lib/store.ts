@@ -96,6 +96,18 @@ export function removeRecurringSeries(id: string): void {
   writeJson("recurring.json", list);
 }
 
+export function cancelRecurringOccurrence(seriesId: string, timestamp: number): boolean {
+  const list = readJson<RecurringSeries>("recurring.json");
+  const idx = list.findIndex((r) => r.id === seriesId);
+  if (idx < 0) return false;
+  const canceled = list[idx].canceledOccurrences ?? [];
+  if (!canceled.includes(timestamp)) {
+    list[idx] = { ...list[idx], canceledOccurrences: [...canceled, timestamp] };
+    writeJson("recurring.json", list);
+  }
+  return true;
+}
+
 export function listLessons(): Lesson[] {
   return readJson<Lesson>("lessons.json");
 }

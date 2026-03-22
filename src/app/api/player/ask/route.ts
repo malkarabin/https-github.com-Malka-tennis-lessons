@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCoach, getPlayer, listPlayersByCoach, addLesson } from "@/lib/store";
+import { getCoach, getPlayer, listPlayersByCoach, addLesson, removeLesson, cancelRecurringOccurrence } from "@/lib/store";
 import { getMergedLessons } from "@/lib/merged-lessons";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
@@ -107,13 +107,13 @@ export async function POST(req: NextRequest) {
           const h = new Date(l.start).getHours();
           const who = playerMap.get(l.playerId) ?? l.playerId;
           const isMe = l.playerId === playerId ? " (השיעור שלך)" : "";
-          return `  ${String(h).padStart(2,"0")}:00 — ${who}${isMe}`;
+          return `  ${String(h).padStart(2,"0")}:00–${String(h+1).padStart(2,"0")}:00 — ${who}${isMe}`;
         })
         .join("\n");
       const freeHours = ALL_HOURS.filter((h) => !takenHours.includes(h))
-        .map((h) => `${String(h).padStart(2,"0")}:00`)
+        .map((h) => `${String(h).padStart(2,"0")}:00–${String(h+1).padStart(2,"0")}:00`)
         .join(", ");
-      return `### יום ${dayHe} ${dateStr} (${dateKey})\nתפוס:\n${takenLines}\nפנוי: ${freeHours}`;
+      return `### יום ${dayHe} ${dateStr} (${dateKey})\nתפוס:\n${takenLines}\nפנוי לחלוטין (כל אחת מהשעות הבאות היא שיעור עצמאי פנוי): ${freeHours}`;
     })
     .join("\n\n");
 
@@ -128,14 +128,16 @@ ${scheduleByDay || "אין שיעורים רשומים בטווח הקרוב."}
 
 ## כללי זמינות — חובה לפעול לפיהם במדויק:
 - שעות עבודה: 07:00 עד 20:00 בלבד (שעות שלמות בלבד).
+- כל שיעור הוא בדיוק 60 דקות. שיעור שמתחיל ב-10:00 מסתיים ב-11:00 בדיוק — ו-11:00 **פנוי לחלוטין**.
 - הלוח למעלה הוא הרשימה המלאה של כל השיעורים התפוסים. **אין מידע נסתר מעבר לרשום בו.**
-- שעה היא תפוסה **אך ורק** אם היא מופיעה מפורשות ברשימת הלוח עם שם תלמיד.
-- שעה שאינה מופיעה ברשימה = **פנויה לחלוטין**, ללא יוצא מן הכלל, גם אם היא צמודה לשיעור אחר.
-- **אסור להסיק** שמאמן תפוס בשעה X בגלל שיש שיעור בשעה Y (אפילו אם Y צמוד ל-X).
-- דוגמה: אם הלוח מציג שיעור בלבד ב-14:00, אז 12:00, 13:00, 15:00 וכל שאר השעות **פנויות**.
+- שעה היא תפוסה **אך ורק** אם מחרוזת "XX:00–YY:00 — שם" מופיעה מפורשות תחת "תפוס".
+- כל שעה המופיעה תחת "פנוי לחלוטין" היא **פנויה ב-100%** — ללא יוצא מן הכלל, גם אם היא צמודה לשיעור לפניה או אחריה.
+- **אסור בהחלט** להסיק שמאמן תפוס בשעה X כי יש שיעור ב-X-1 או ב-X+1. אין buffer, אין הכנה.
+- דוגמה: אם תפוס 10:00–11:00 ו-13:00–14:00, אזי 11:00, 12:00, 14:00 ועוד **פנויים לחלוטין**.
 - **אסור בהחלט** לקבוע שיעור בתאריך או שעה שכבר עברו (לפני ${fmtDate(now)} שעה ${String(now.getHours()).padStart(2,"0")}:00). אם מבקשים תאריך עבר — סרב בנימוס והסבר שלא ניתן.
-- אם השחקן רוצה לקבוע שיעור בשעה פנויה בעתיד — קרא לכלי book_lesson מיד.
+- אם השחקן רוצה לקבוע שיעור בשעה פנויה בעתיד — קרא לכלי book_lesson מיד ללא בקשת אישור נוסף.
 - אם השעה תפוסה — הסבר מי תפוס אותה בדיוק (לפי הלוח) והצע חלופות פנויות.
+- אם השחקן רוצה לבטל שיעור שלו — קרא לכלי cancel_lesson. ניתן לבטל רק מיום המחר והלאה. שיעור של היום — הפנה ל${coachName} ישירות.
 - לעניינים אישיים, רפואיים, משפטיים או חשבוניות — הפנה ל${coachName} ישירות.
 - לשאלות על טכניקת טניס ואימון — תן הנחיות כלליות ומועילות.`;
 
@@ -166,16 +168,23 @@ ${scheduleByDay || "אין שיעורים רשומים בטווח הקרוב."}
         parameters: {
           type: "object",
           properties: {
-            date: {
-              type: "string",
-              description: "תאריך השיעור בפורמט dd/mm/yy (למשל 25/03/26)",
-            },
-            hour: {
-              type: "integer",
-              description: "שעת תחילת השיעור (מספר שלם בין 7 ל-19)",
-              minimum: 7,
-              maximum: 19,
-            },
+            date: { type: "string", description: "תאריך השיעור בפורמט dd/mm/yy (למשל 25/03/26)" },
+            hour: { type: "integer", description: "שעת תחילת השיעור (מספר שלם בין 7 ל-19)", minimum: 7, maximum: 19 },
+          },
+          required: ["date", "hour"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "cancel_lesson",
+        description: "מבטל שיעור קיים של השחקן. ניתן לבטל רק שיעורים מיום המחר והלאה — לא שיעורי היום.",
+        parameters: {
+          type: "object",
+          properties: {
+            date: { type: "string", description: "תאריך השיעור לביטול בפורמט dd/mm/yy" },
+            hour: { type: "integer", description: "שעת תחילת השיעור לביטול", minimum: 7, maximum: 20 },
           },
           required: ["date", "hour"],
         },
@@ -226,6 +235,7 @@ ${scheduleByDay || "אין שיעורים רשומים בטווח הקרוב."}
   // Handle book_lesson tool call
   const toolCall = choice.tool_calls[0];
   let toolResult: string;
+  let scheduleChanged = false;
 
   if (toolCall.function.name === "book_lesson") {
     let args: { date?: string; hour?: number };
@@ -248,9 +258,11 @@ ${scheduleByDay || "אין שיעורים רשומים בטווח הקרוב."}
       if (slotStart.getTime() < Date.now()) {
         toolResult = "לא ניתן לקבוע שיעור בתאריך או שעה שעברו.";
       } else {
+        const slotEnd = slotStart.getTime() + 60 * 60 * 1000;
         const conflict = allLessons.find((l) => {
-          const ls = new Date(l.start).getTime();
-          return ls === slotStart.getTime();
+          const lStart = new Date(l.start).getTime();
+          const lEnd = lStart + (l.durationMinutes ?? 60) * 60 * 1000;
+          return lStart < slotEnd && lEnd > slotStart.getTime();
         });
 
         if (conflict) {
@@ -269,11 +281,59 @@ ${scheduleByDay || "אין שיעורים רשומים בטווח הקרוב."}
           });
 
           if (result.ok) {
+            scheduleChanged = true;
             const dayHe = DAYS_HE[slotStart.getDay()];
             toolResult = `השיעור נקבע בהצלחה! יום ${dayHe} ${fmtDate(slotStart)} בשעה ${String(hour).padStart(2, "0")}:00–${String(hour + 1).padStart(2, "0")}:00.`;
           } else {
             toolResult = `לא ניתן לקבוע את השיעור: ${result.error ?? "שגיאה לא ידועה"}.`;
           }
+        }
+      }
+    }
+  } else if (toolCall.function.name === "cancel_lesson") {
+    let args: { date?: string; hour?: number };
+    try { args = JSON.parse(toolCall.function.arguments); } catch { args = {}; }
+
+    const dateStr = args.date ?? "";
+    const hour = args.hour ?? -1;
+    const parsedDate = parseDdMmYy(dateStr);
+
+    if (!parsedDate || hour < 7 || hour > 20) {
+      toolResult = "שגיאה: פרטי התאריך או השעה אינם תקינים.";
+    } else {
+      const slotStart = new Date(parsedDate);
+      slotStart.setHours(hour, 0, 0, 0);
+
+      // Block today
+      const startOfTomorrow = new Date();
+      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+      startOfTomorrow.setHours(0, 0, 0, 0);
+      if (slotStart.getTime() < startOfTomorrow.getTime()) {
+        toolResult = "לא ניתן לבטל שיעור של היום או שיעורים שעברו. לביטול שיעור היום — פנה/י למאמן ישירות.";
+      } else {
+        const slotEnd = slotStart.getTime() + 60 * 60 * 1000;
+        const lesson = allLessons.find((l) => {
+          if (l.playerId !== playerId) return false;
+          const lStart = new Date(l.start).getTime();
+          const lEnd = lStart + (l.durationMinutes ?? 60) * 60 * 1000;
+          return lStart < slotEnd && lEnd > slotStart.getTime();
+        });
+
+        if (!lesson) {
+          toolResult = `לא נמצא שיעור של ${playerName} ביום ${DAYS_HE[slotStart.getDay()]} ${fmtDate(slotStart)} בשעה ${String(hour).padStart(2,"0")}:00.`;
+        } else if (lesson.id.startsWith("rec-")) {
+          const lastDash = lesson.id.lastIndexOf("-");
+          const seriesId = lesson.id.slice(4, lastDash);
+          const timestamp = Number(lesson.id.slice(lastDash + 1));
+          const ok = cancelRecurringOccurrence(seriesId, timestamp);
+          if (ok) scheduleChanged = true;
+          toolResult = ok
+            ? `השיעור ביום ${DAYS_HE[slotStart.getDay()]} ${fmtDate(slotStart)} בשעה ${String(hour).padStart(2,"0")}:00 בוטל בהצלחה.`
+            : "שגיאה בביטול השיעור החוזר.";
+        } else {
+          removeLesson(lesson.id);
+          scheduleChanged = true;
+          toolResult = `השיעור ביום ${DAYS_HE[slotStart.getDay()]} ${fmtDate(slotStart)} בשעה ${String(hour).padStart(2,"0")}:00 בוטל בהצלחה.`;
         }
       }
     }
@@ -295,13 +355,12 @@ ${scheduleByDay || "אין שיעורים רשומים בטווח הקרוב."}
   });
 
   if (!res2.ok) {
-    // Return the tool result directly if second call fails
-    return NextResponse.json({ reply: toolResult });
+    return NextResponse.json({ reply: toolResult, scheduleChanged });
   }
 
   const data2 = (await res2.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
   const reply = data2.choices?.[0]?.message?.content?.trim() ?? toolResult;
-  return NextResponse.json({ reply });
+  return NextResponse.json({ reply, scheduleChanged });
 }

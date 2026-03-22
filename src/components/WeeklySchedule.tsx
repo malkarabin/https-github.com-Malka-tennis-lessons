@@ -10,7 +10,6 @@ type Lesson = {
   durationMinutes: number;
 };
 
-const HOURS = 7;
 const SLOT_MINUTES = 60;
 
 function weekStart(date: Date): Date {
@@ -108,6 +107,7 @@ export default function WeeklySchedule({
   } | null>(null);
   const [addPlayerId, setAddPlayerId] = useState("");
   const [addLessonError, setAddLessonError] = useState<string | null>(null);
+  const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
 
   const rangeStart = useMemo(() => {
     const d = new Date(weekStartDate);
@@ -203,6 +203,35 @@ export default function WeeklySchedule({
 
   const goToToday = () => setWeekStartDate(weekStart(new Date()));
 
+  const cancelLesson = (lessonId: string) => {
+    fetch(`/api/lessons/${lessonId}`, { method: "DELETE" })
+      .then((r) => {
+        if (r.ok) {
+          setCancelConfirm(null);
+          setLessons((prev) => prev.filter((l) => l.id !== lessonId));
+        }
+      })
+      .catch(() => {});
+  };
+
+  const canCancelLesson = (lesson: Lesson) => {
+    if (!playerId) return true; // coach can cancel any
+    return lesson.playerId === playerId; // player can cancel own only
+  };
+
+  const isLessonToday = (lesson: Lesson) => {
+    const d = new Date(lesson.start);
+    const t = new Date();
+    return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+  };
+
+  const isLessonFuture = (lesson: Lesson) => {
+    const startOfTomorrow = new Date();
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+    startOfTomorrow.setHours(0, 0, 0, 0);
+    return new Date(lesson.start).getTime() >= startOfTomorrow.getTime();
+  };
+
   /** Slot is bookable only from the next full hour through 20:00 (inclusive). */
   const isSlotBookable = (dayIndex: number, hour: number) => {
     if (hour < 7 || hour > 20) return false;
@@ -241,7 +270,6 @@ export default function WeeklySchedule({
           היום
         </button>
       </div>
-      <p className="schedule-hint">תצוגת שבוע (ראשון–שבת)</p>
       <div className="schedule-table-wrap">
       <table className="schedule-table">
         <thead>
@@ -279,8 +307,25 @@ export default function WeeklySchedule({
                     }}
                   >
                     {lesson ? (
-                      <span title="1h" style={{ display: "block", minHeight: "1.5em" }}>
-                        {playerName ?? lesson.playerId.slice(0, 8)}
+                      <span style={{ display: "block", minHeight: "1.5em" }}>
+                        <span>{playerName ?? lesson.playerId.slice(0, 8)}</span>
+                        {canCancelLesson(lesson) && isLessonFuture(lesson) && cancelConfirm !== lesson.id && (
+                          <button
+                            type="button"
+                            className="schedule-slot-cancel-btn"
+                            title="בטל שיעור"
+                            onClick={(e) => { e.stopPropagation(); setCancelConfirm(lesson.id); }}
+                          >✕</button>
+                        )}
+                        {canCancelLesson(lesson) && isLessonToday(lesson) && cancelConfirm !== lesson.id && (
+                          <span className="schedule-slot-cancel-today" title="לביטול שיעור היום פנה/י למאמן">📞</span>
+                        )}
+                        {cancelConfirm === lesson.id && (
+                          <span className="schedule-slot-cancel-confirm">
+                            <button type="button" className="btn btn-sm btn-danger" onClick={() => cancelLesson(lesson.id)}>בטל שיעור</button>
+                            <button type="button" className="btn btn-sm" onClick={() => setCancelConfirm(null)}>חזור</button>
+                          </span>
+                        )}
                       </span>
                     ) : canAddLesson && !isAdding && isSlotBookable(dayIndex, hour) ? (
                       <button type="button" className="schedule-slot-add" onClick={() => { setAddLessonError(null); setAdding({ dayIndex, hour }); }}>+</button>

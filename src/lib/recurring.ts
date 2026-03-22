@@ -29,10 +29,11 @@ function addWeek(d: Date): Date {
   return out;
 }
 
-/** Generate lesson instance for a given date (same hour as series). */
-function instanceAt(series: RecurringSeries, date: Date): Lesson {
+/** Generate lesson instance for a given date (same hour as series). Returns null if occurrence is canceled. */
+function instanceAt(series: RecurringSeries, date: Date): Lesson | null {
   const start = new Date(date);
   start.setHours(series.hour, 0, 0, 0);
+  if (series.canceledOccurrences?.includes(start.getTime())) return null;
   return {
     id: `rec-${series.id}-${start.getTime()}`,
     coachId: series.coachId,
@@ -98,7 +99,10 @@ export function expandSeries(
     }
     if (d.getTime() > windowEnd.getTime()) return result;
     for (let i = 0; i < N && d.getTime() <= windowEnd.getTime(); i++) {
-      if (d.getTime() >= windowStart.getTime()) result.push(instanceAt(series, d));
+      if (d.getTime() >= windowStart.getTime()) {
+        const inst = instanceAt(series, d);
+        if (inst) result.push(inst);
+      }
       d = addWeek(d);
       d.setHours(series.hour, 0, 0, 0);
     }
@@ -121,7 +125,7 @@ export function expandSeries(
       d.setHours(series.hour, 0, 0, 0);
       while (d.getTime() <= monthEnd.getTime()) {
         const inst = instanceAt(series, d);
-        if (new Date(inst.start).getTime() >= firstAllowed) result.push(inst);
+        if (inst && new Date(inst.start).getTime() >= firstAllowed) result.push(inst);
         d = addWeek(d);
         d.setHours(series.hour, 0, 0, 0);
       }

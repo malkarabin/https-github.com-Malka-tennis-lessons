@@ -31,6 +31,24 @@ function formatDateDdMmYy(isoDate: string | undefined): string {
   return `${d}/${m}/${y}`;
 }
 
+function ymdToDdMmYy(ymd: string): string {
+  if (!ymd) return "";
+  const [y, m, d] = ymd.split("-");
+  if (!y || !m || !d) return "";
+  return `${d}/${m}/${y.slice(-2)}`;
+}
+
+function ddMmYyToYmd(text: string): string | null {
+  const match = text.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (!match) return null;
+  const d = match[1].padStart(2, "0");
+  const m = match[2].padStart(2, "0");
+  const y = match[3].length === 2 ? `20${match[3]}` : match[3];
+  const date = new Date(`${y}-${m}-${d}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${y}-${m}-${d}`;
+}
+
 export default function PlayerSchedulePage() {
   const [coachId, setCoachId] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -48,11 +66,19 @@ export default function PlayerSchedulePage() {
   const [recurringError, setRecurringError] = useState<string | null>(null);
   const [recurringShowCount, setRecurringShowCount] = useState(RECURRING_PAGE_SIZE);
   const [coachName, setCoachName] = useState("");
+  const [dateText, setDateText] = useState("");
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (searchParams.get("view") === "recurring") setViewMode("recurring");
   }, [searchParams]);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("scheduleNeedsRefresh") === "1") {
+      sessionStorage.removeItem("scheduleNeedsRefresh");
+      setScheduleRefreshKey((k) => k + 1);
+    }
+  }, []);
 
   useEffect(() => {
     const raw = typeof window !== "undefined" ? sessionStorage.getItem("session") : null;
@@ -73,11 +99,13 @@ export default function PlayerSchedulePage() {
     const y = tomorrow.getFullYear();
     const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
     const d = String(tomorrow.getDate()).padStart(2, "0");
+    const ymd = `${y}-${m}-${d}`;
     setNewRecurring((prev) => ({
       ...prev,
       weekday: (new Date().getDay() + 1) % 7,
-      startDate: `${y}-${m}-${d}`,
+      startDate: ymd,
     }));
+    setDateText(ymdToDdMmYy(ymd));
   }, []);
 
   useEffect(() => {
@@ -162,13 +190,15 @@ export default function PlayerSchedulePage() {
   return (
     <div className="app-wrap">
       <nav className="nav">
-        <span className="nav-title">{playerName} — המערכת של המאמן שלי ({coachName || "…"})</span>
+        <span className="nav-title">{playerName} — המערכת של המאמן שלי: {coachName || "…"}</span>
         <div className="nav-links">
-          <Link href="/player/ask">שאלה למאמן</Link>
+          <Link href="/player/ask">שיחה עם המאמן שלי</Link>
           <Link href="/">דף הבית</Link>
         </div>
       </nav>
-      <h1 className="page-title">המערכת של המאמן</h1>
+      <h1 className="page-title">
+        {viewMode === "week" ? "המערכת של המאמן — קביעת שיעור" : "המערכת של המאמן"}
+      </h1>
 
       <div className="view-tabs">
         <button
@@ -195,24 +225,45 @@ export default function PlayerSchedulePage() {
       </div>
 
       <p className="page-sub page-sub-player">
-        {playerName && coachName ? `${playerName} — המאמן: ${coachName}. ` : ""}
-        {viewMode === "week"
-          ? "תצוגת שבוע (ראשון–שבת). לחיצה על תא תפוס מציגה את שם השחקן."
-          : viewMode === "month"
-            ? "תצוגת חודש — צפייה בלבד."
-            : "קביעת שיעורים חוזרים אצל המאמן שלי."}
+        {viewMode === "month"
+          ? <strong>תצוגת חודש — צפייה בלבד. תיאום שיעורים במבט השבועי.</strong>
+          : null}
       </p>
 
       {viewMode === "recurring" && (
         <div className="recurring-card">
-          <h2>שיעור חוזר</h2>
-          <p className="recurring-desc">קבעי שיעור באותו יום ושעה כל שבוע. המופעים מתחילים מהתאריך שבחרת או מהשבוע המוצג.</p>
+          <h2>קביעת שיעור חוזר</h2>
+          <p className="recurring-desc">השיעורים החוזרים יתחילו מהתאריך הנבחר.</p>
           <div className="recurring-form-grid">
             <div className="recurring-form-group">
               <label>יום</label>
               <select
                 value={newRecurring.weekday}
-                onChange={(e) => setNewRecurring((p) => ({ ...p, weekday: Number(e.target.value) }))}
+                onChange={(e) => {
+                  const newWeekday = Number(e.target.value);
+                  const currentDate = newRecurring.startDate
+                    ? new Date(newRecurring.startDate + "T12:00:00")
+                    : new Date();
+                  const weekSun = new Date(currentDate);
+                  weekSun.setDate(currentDate.getDate() - currentDate.getDay());
+                  const targetDate = new Date(weekSun);
+                  targetDate.setDate(weekSun.getDate() + newWeekday);
+                  if (currentDate.getDay() === 6 && newWeekday === 0) {
+                    targetDate.setDate(targetDate.getDate() + 7);
+                  }
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  tomorrow.setHours(0, 0, 0, 0);
+                  if (targetDate < tomorrow) {
+                    targetDate.setDate(targetDate.getDate() + 7);
+                  }
+                  const y = targetDate.getFullYear();
+                  const m = String(targetDate.getMonth() + 1).padStart(2, "0");
+                  const d = String(targetDate.getDate()).padStart(2, "0");
+                  const ymd = `${y}-${m}-${d}`;
+                  setNewRecurring((p) => ({ ...p, weekday: newWeekday, startDate: ymd }));
+                  setDateText(ymdToDdMmYy(ymd));
+                }}
               >
                 {WEEKDAY_NAMES.map((name, i) => (
                   <option key={i} value={i}>{name}</option>
@@ -231,12 +282,22 @@ export default function PlayerSchedulePage() {
               </select>
             </div>
             <div className="recurring-form-group">
-              <label>מתאריך (פורמט: dd/mm/yy)</label>
+              <label>מתאריך (dd/mm/yy)</label>
               <input
-                type="date"
-                value={newRecurring.startDate}
-                onChange={(e) => setNewRecurring((p) => ({ ...p, startDate: e.target.value }))}
+                type="text"
+                placeholder="dd/mm/yy"
+                value={dateText}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setDateText(text);
+                  const ymd = ddMmYyToYmd(text);
+                  if (ymd) {
+                    const parsed = new Date(ymd + "T12:00:00");
+                    setNewRecurring((p) => ({ ...p, startDate: ymd, weekday: parsed.getDay() }));
+                  }
+                }}
                 aria-label="תאריך התחלה"
+                style={{ maxWidth: "8rem" }}
               />
             </div>
           </div>

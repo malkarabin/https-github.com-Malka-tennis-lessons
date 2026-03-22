@@ -111,7 +111,9 @@ export default function HomePage() {
       <div className="app-wrap">
         <nav className="nav">
           <span className="nav-title">
-            {session.role === "coach" ? "מאמן" : "שחקן"} — {session.role === "player" ? `${playerName} · מאמן: ${coachName}` : coachName}
+            {session.role === "player"
+              ? <strong>{playerName} — המאמן שלך: {coachName}</strong>
+              : <strong>מאמן — {coachName}</strong>}
           </span>
           <div className="nav-links">
             {session.role === "coach" && (
@@ -125,7 +127,7 @@ export default function HomePage() {
               <>
                 <Link href="/player/schedule">המערכת של המאמן</Link>
                 <Link href="/player/schedule?view=recurring">שיעורים חוזרים</Link>
-                <Link href="/player/ask">שאלה למאמן</Link>
+                <Link href="/player/ask">שיחה עם המאמן שלי</Link>
               </>
             )}
             <button type="button" className="btn btn-sm" onClick={signOut}>
@@ -133,9 +135,6 @@ export default function HomePage() {
             </button>
           </div>
         </nav>
-        <p className="page-sub page-sub-player">
-          {session.role === "player" && `${playerName} — המאמן שלך: ${coachName}`}
-        </p>
       </div>
     );
   }

@@ -69,6 +69,7 @@ export default function MonthSchedule({
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   const { start: rangeStart, end: rangeEnd } = useMemo(
     () => getMonthBounds(viewYear, viewMonth),
@@ -166,7 +167,6 @@ export default function MonthSchedule({
           היום
         </button>
       </div>
-      <p className="schedule-hint">תצוגת חודש — צפייה בלבד. תיאום שיעורים במבט השבועי.</p>
       <div className="month-grid-wrap">
         <table className="month-table">
           <thead>
@@ -182,10 +182,15 @@ export default function MonthSchedule({
                 {row.map((d, colIdx) => {
                   const inMonth = isInViewedMonth(d, viewYear, viewMonth);
                   const dayLessons = getLessonsForDay(d);
+                  const dayKey = d.toISOString().slice(0, 10);
+                  const isExpanded = expandedDay === dayKey && dayLessons.length > 3;
                   return (
                     <td
                       key={colIdx}
                       className={`month-day ${inMonth ? "month-day-in" : "month-day-out"} ${isToday(d) ? "month-day-today" : ""}`}
+                      style={{ position: "relative" }}
+                      onMouseEnter={() => { if (inMonth && dayLessons.length > 3) setExpandedDay(dayKey); }}
+                      onMouseLeave={() => setExpandedDay(null)}
                     >
                       <span className="month-day-num">{d.getDate()}</span>
                       {inMonth && dayLessons.length > 0 && (
@@ -200,7 +205,6 @@ export default function MonthSchedule({
                               <li
                                 key={l.id}
                                 className="month-lesson-item"
-                                title={`${name} ${hour}:00`}
                                 style={{
                                   backgroundColor: hexToRgba(playerColor, 0.5),
                                   color: isDark(playerColor) ? "#fff" : "#1a1a1a",
@@ -216,6 +220,30 @@ export default function MonthSchedule({
                             </li>
                           )}
                         </ul>
+                      )}
+                      {isExpanded && (
+                        <div className="month-day-expand">
+                          <strong className="month-day-expand-title">{d.getDate()} — כל השיעורים</strong>
+                          <ul className="month-day-expand-list">
+                            {dayLessons.map((l) => {
+                              const name = players.find((p) => p.id === l.playerId)?.name ?? l.playerId.slice(0, 6);
+                              const hour = new Date(l.start).getHours();
+                              const playerColor = getPlayerColor(l.playerId);
+                              return (
+                                <li
+                                  key={l.id}
+                                  className="month-lesson-item"
+                                  style={{
+                                    backgroundColor: hexToRgba(playerColor, 0.5),
+                                    color: isDark(playerColor) ? "#fff" : "#1a1a1a",
+                                  }}
+                                >
+                                  {name} {hour}:00
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
                       )}
                     </td>
                   );

@@ -34,6 +34,7 @@ export type RecurringSeries = {
   endConditionValue: number | "current" | "next" | "both"; // N for afterN; "current"|"next"|"both" for throughMonth
   startDate?: string; // optional ISO date (YYYY-MM-DD) — first occurrence on or after this date
   createdAt?: string; // ISO timestamp for sorting (newest first)
+  canceledOccurrences?: number[]; // timestamps (ms) of canceled single occurrences
 };
 
 export type Role = "coach" | "player";

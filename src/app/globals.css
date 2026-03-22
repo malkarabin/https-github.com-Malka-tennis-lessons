@@ -301,6 +301,44 @@ input:focus, select:focus {
 .schedule-slot-unavailable-cell .schedule-slot-unavailable {
   color: var(--text-muted);
 }
+.schedule-slot-cancel-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(0,0,0,0.35);
+  font-size: 0.7rem;
+  padding: 0 0 0 4px;
+  line-height: 1;
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.schedule-slot-filled:hover .schedule-slot-cancel-btn {
+  opacity: 1;
+}
+.schedule-slot-cancel-btn:hover {
+  color: #c0392b;
+}
+.schedule-slot-cancel-today {
+  font-size: 0.7rem;
+  cursor: default;
+  padding: 0 0 0 4px;
+  vertical-align: middle;
+}
+.schedule-slot-cancel-confirm {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.btn-danger {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+}
+.btn-danger:hover {
+  background: #c0392b;
+}
 .schedule-add {
   display: flex;
   flex-wrap: wrap;
@@ -414,6 +452,34 @@ input:focus, select:focus {
   font-size: 0.75rem;
   color: var(--accent);
   font-weight: 500;
+}
+
+.month-day-expand {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  min-width: 160px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-float);
+  padding: 0.5rem;
+  pointer-events: none;
+}
+.month-day-expand-title {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.month-day-expand-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 /* ========== Landing / Login page ========== */

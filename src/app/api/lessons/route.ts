@@ -41,7 +41,6 @@ export async function POST(request: Request) {
   const startT = lessonStart.getTime();
   const endT = lessonEnd.getTime();
   const conflict = candidates.find((l) => {
-    if (l.playerId === body.playerId) return false;
     const lStart = new Date(l.start).getTime();
     const lEnd = lStart + (l.durationMinutes ?? 60) * 60 * 1000;
     return lStart < endT && lEnd > startT;

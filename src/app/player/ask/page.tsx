@@ -58,6 +58,19 @@ export default function PlayerAskPage() {
   }, [coachId, playerId]);
 
   useEffect(() => {
+    if (!coachId || !playerId) return;
+    const saved = sessionStorage.getItem(`chat-${coachId}-${playerId}`);
+    if (saved) {
+      try { setMessages(JSON.parse(saved)); } catch { /* ignore */ }
+    }
+  }, [coachId, playerId]);
+
+  useEffect(() => {
+    if (!coachId || !playerId) return;
+    sessionStorage.setItem(`chat-${coachId}-${playerId}`, JSON.stringify(messages));
+  }, [messages, coachId, playerId]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
@@ -90,6 +103,7 @@ export default function PlayerAskPage() {
         return;
       }
       const reply = data.reply as string;
+      if (data.scheduleChanged) sessionStorage.setItem("scheduleNeedsRefresh", "1");
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch {
       setError("שגיאת רשת");
@@ -110,9 +124,9 @@ export default function PlayerAskPage() {
   return (
     <div className="app-wrap">
       <nav className="nav" style={{ marginBottom: "1rem" }}>
-        <span className="nav-title">שאלה למאמן — {coachName || "…"}</span>
+        <span className="nav-title">{playerName || "…"} — שיחה עם המאמן שלי: {coachName || "…"}</span>
         <div className="nav-links">
-          <Link href="/player/schedule">המערכת של המאמן</Link>
+          <Link href="/player/schedule">המערכת של המאמן שלי</Link>
           <Link href="/">דף הבית</Link>
         </div>
       </nav>

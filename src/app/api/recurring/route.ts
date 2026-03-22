@@ -89,7 +89,6 @@ export async function POST(request: Request) {
     const startT = instStart.getTime();
     const endT = instEnd.getTime();
     const conflict = candidates.find((l) => {
-      if (l.playerId === payload.playerId) return false;
       const lStart = new Date(l.start).getTime();
       const lEnd = lStart + (l.durationMinutes ?? 60) * 60 * 1000;
       return lStart < endT && lEnd > startT;
