@@ -87,7 +87,10 @@
     "weekday": 2,
     "hour": 10,
     "endConditionType": "afterN",
-    "endConditionValue": 4
+    "endConditionValue": 4,
+    "canceledOccurrences": [
+      1774339200000
+    ]
   },
   {
     "id": "rec-1773523751655",
@@ -96,7 +99,10 @@
     "weekday": 2,
     "hour": 10,
     "endConditionType": "throughMonth",
-    "endConditionValue": "both"
+    "endConditionValue": "both",
+    "canceledOccurrences": [
+      1774339200000
+    ]
   },
   {
     "id": "rec-1773523882002",
@@ -186,7 +192,10 @@
     "weekday": 4,
     "hour": 10,
     "endConditionType": "afterN",
-    "endConditionValue": 2
+    "endConditionValue": 2,
+    "canceledOccurrences": [
+      1774512000000
+    ]
   },
   {
     "id": "rec-1773610118042",
@@ -341,14 +350,127 @@
     "createdAt": "2026-03-21T20:47:34.521Z"
   },
   {
-    "id": "rec-1774126060998",
+    "id": "rec-1774207754407",
+    "coachId": "c1",
+    "playerId": "p-1773509296168",
+    "weekday": 3,
+    "hour": 13,
+    "endConditionType": "throughMonth",
+    "endConditionValue": "both",
+    "startDate": "2026-03-25",
+    "createdAt": "2026-03-22T19:29:14.417Z"
+  },
+  {
+    "id": "rec-1774209386877",
+    "coachId": "c1",
+    "playerId": "p-1773509296168",
+    "weekday": 2,
+    "hour": 13,
+    "endConditionType": "afterN",
+    "endConditionValue": 2,
+    "startDate": "2026-03-24",
+    "createdAt": "2026-03-22T19:56:26.886Z"
+  },
+  {
+    "id": "rec-1774209498707",
+    "coachId": "c1",
+    "playerId": "p-1773509408635",
+    "weekday": 1,
+    "hour": 15,
+    "endConditionType": "throughMonth",
+    "endConditionValue": "both",
+    "startDate": "2026-03-23",
+    "createdAt": "2026-03-22T19:58:18.721Z"
+  },
+  {
+    "id": "rec-1774212338997",
+    "coachId": "c1",
+    "playerId": "p-1773509408635",
+    "weekday": 2,
+    "hour": 9,
+    "endConditionType": "throughMonth",
+    "endConditionValue": "both",
+    "startDate": "2026-03-24",
+    "createdAt": "2026-03-22T20:45:39.011Z"
+  },
+  {
+    "id": "rec-1774212433768",
+    "coachId": "c1",
+    "playerId": "p-1773509404073",
+    "weekday": 4,
+    "hour": 9,
+    "endConditionType": "afterN",
+    "endConditionValue": 2,
+    "startDate": "2026-03-26",
+    "createdAt": "2026-03-22T20:47:13.782Z"
+  },
+  {
+    "id": "rec-1774212455714",
+    "coachId": "c1",
+    "playerId": "p-1773509404073",
+    "weekday": 4,
+    "hour": 9,
+    "endConditionType": "afterN",
+    "endConditionValue": 2,
+    "startDate": "2026-03-26",
+    "createdAt": "2026-03-22T20:47:35.725Z"
+  },
+  {
+    "id": "rec-1774212518979",
+    "coachId": "c1",
+    "playerId": "p-1773509404073",
+    "weekday": 4,
+    "hour": 9,
+    "endConditionType": "afterN",
+    "endConditionValue": 2,
+    "startDate": "2026-03-26",
+    "createdAt": "2026-03-22T20:48:38.989Z"
+  },
+  {
+    "id": "rec-1774212913484",
     "coachId": "c1",
     "playerId": "p2",
     "weekday": 1,
     "hour": 12,
     "endConditionType": "afterN",
-    "endConditionValue": 2,
+    "endConditionValue": 4,
     "startDate": "2026-03-23",
-    "createdAt": "2026-03-21T20:47:41.010Z"
+    "createdAt": "2026-03-22T20:55:13.496Z"
+  },
+  {
+    "id": "rec-1774213560784",
+    "coachId": "c2",
+    "playerId": "p3",
+    "weekday": 1,
+    "hour": 10,
+    "endConditionType": "afterN",
+    "endConditionValue": 4,
+    "startDate": "2026-03-23",
+    "createdAt": "2026-03-22T21:06:00.797Z",
+    "canceledOccurrences": [
+      1775458800000
+    ]
+  },
+  {
+    "id": "rec-1774215278526",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "playerId": "p-1774128296333",
+    "weekday": 1,
+    "hour": 11,
+    "endConditionType": "afterN",
+    "endConditionValue": 3,
+    "startDate": "2026-03-23",
+    "createdAt": "2026-03-22T21:34:38.615Z"
+  },
+  {
+    "id": "rec-1774215448728",
+    "coachId": "בר-גוילי-mn0u5w6z",
+    "playerId": "p-1774128296333",
+    "weekday": 2,
+    "hour": 12,
+    "endConditionType": "afterN",
+    "endConditionValue": 3,
+    "startDate": "2026-03-24",
+    "createdAt": "2026-03-22T21:37:28.814Z"
   }
 ]
