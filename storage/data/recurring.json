@@ -89,7 +89,8 @@
     "endConditionType": "afterN",
     "endConditionValue": 4,
     "canceledOccurrences": [
-      1774339200000
+      1774339200000,
+      1774940400000
     ]
   },
   {
@@ -101,7 +102,8 @@
     "endConditionType": "throughMonth",
     "endConditionValue": "both",
     "canceledOccurrences": [
-      1774339200000
+      1774339200000,
+      1774940400000
     ]
   },
   {

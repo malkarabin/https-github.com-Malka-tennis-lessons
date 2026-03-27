@@ -425,5 +425,12 @@
     "playerId": "p-1773509408635",
     "start": "2026-03-24T08:00:00.000Z",
     "durationMinutes": 60
+  },
+  {
+    "id": "lesson-1774634232850-p-1773509412044",
+    "coachId": "c1",
+    "playerId": "p-1773509412044",
+    "start": "2026-03-30T10:00:00.000Z",
+    "durationMinutes": 60
   }
 ]
