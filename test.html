@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>שיעורי טניס — גרסת דפדפן (עצמאית)</title>
+  <style>
+    :root {
+      --bg: #faf9f7;
+      --card: #fff;
+      --border: #e8e4df;
+      --text: #3d3a36;
+      --muted: #6b6560;
+      --accent: #8fb996;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 1rem; max-width: 1100px; margin-inline: auto; background: var(--bg); color: var(--text); }
+    .app-wrap { padding: 0.5rem 0; }
+    .page-title { margin: 0 0 1rem 0; font-size: 1.5rem; font-weight: 600; } 
+    .nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+    .nav-links { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .nav-links a { padding: 0.5rem 0.85rem; border-radius: 8px; background: var(--bg); color: var(--text); text-decoration: none; font-weight: 500; }
+    .nav-links a:hover { background: var(--accent); color: #fff; }
+    .nav-title { font-weight: 600; margin: 0; font-size: 1rem; }
+    .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+    .card h2 { margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600; }
+    .card p { margin: 0 0 0.75rem 0; color: var(--muted); font-size: 0.95rem; }
+    .btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); }
+    .btn:hover { background: var(--bg); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: #7aa882; color: #fff; }
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.85rem; }
+    select, input { padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--card); margin: 0.25rem 0.25rem 0.25rem 0; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    th, td { border: 1px solid var(--border); padding: 0.4rem 0.5rem; text-align: center; }
+    th { background: var(--bg); font-weight: 600; }
+    .slot { min-width: 80px; min-height: 2rem; vertical-align: top; }
+    .add-btn { font-size: 0.85rem; padding: 0.2rem 0.4rem; cursor: pointer; border: 1px dashed var(--border); background: var(--bg); border-radius: 6px; color: var(--muted); }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .week-nav { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .week-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .info { font-size: 0.9rem; color: var(--muted); margin: 0 0 1rem 0; }
+    .standalone-banner {
+      background: linear-gradient(165deg, rgba(143, 185, 150, 0.15), var(--card));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      box-shadow: var(--shadow);
+    }
+    .standalone-banner code { font-size: 0.8rem; }
+    .standalone-footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="standalone-banner" role="note">
+    <strong>גרסת דפדפן (עצמאית)</strong> — פתחי את הקובץ בדפדפן (לחיצה כפולה על <code>run.html</code> או <code>tennis-app-browser.html</code>).
+    הנתונים נשמרים רק במחשב זה (דפדפן). האפליקציה המלאה עם API ו-LLM רצה עם <code>npm run dev</code> בפרויקט Next.js.
+  </div>
+  <div id="root"></div>
+  <script>
+    (function () {
+      const STORAGE = {
+        coaches: 'tennis_coaches',
+        players: 'tennis_players',
+        lessons: 'tennis_lessons',
+        session: 'tennis_session'
+      };
+
+      function getCoaches() {
+        const raw = localStorage.getItem(STORAGE.coaches);
+        if (raw) return JSON.parse(raw);
+        const seed = [
+          { id: 'c1', name: 'Coach Anna' },
+          { id: 'c2', name: 'Coach Ben' }
+        ];
+        localStorage.setItem(STORAGE.coaches, JSON.stringify(seed));
+        return seed;
+      }
+
+      function getPlayers() {
+        const raw = localStorage.getItem(STORAGE.players);
+        if (raw) return JSON.parse(raw);
+        const seed = [
+          { id: 'p1', coachId: 'c1', name: 'שחקן 1', color: '#b5d6b2' },
+          { id: 'p2', coachId: 'c1', name: 'שחקן 2', color: '#a8d4e6' },
+          { id: 'p3', coachId: 'c2', name: 'שחקן 3', color: '#f2c4b8' }
+        ];
+        localStorage.setItem(STORAGE.players, JSON.stringify(seed));
+        return seed;
+      }
+
+      function getLessons() {
+        const raw = localStorage.getItem(STORAGE.lessons);
+        return raw ? JSON.parse(raw) : [];
+      }
+
+      function saveLessons(lessons) {
+        localStorage.setItem(STORAGE.lessons, JSON.stringify(lessons));
+      }
+
+      function getSession() {
+        const raw = localStorage.getItem(STORAGE.session);
+        return raw ? JSON.parse(raw) : null;
+      }
+
+      function setSession(s) {
+        if (s) localStorage.setItem(STORAGE.session, JSON.stringify(s));
+        else localStorage.removeItem(STORAGE.session);
+      }
+
+      // Calendar: week = Sunday–Saturday, month = calendar month
+      function weekStart(d) {
+        const x = new Date(d);
+        const day = x.getDay();
+        x.setDate(x.getDate() - day);
+        x.setHours(0,0,0,0);
+        return x;
+      }
+
+      function addWeeks(d, n) {
+        const x = new Date(d);
+        x.setDate(x.getDate() + n * 7);
+        return x;
+      }
+
+      function currentMonthEnd() {
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth() + 1, 0, 23, 59, 59, 999);
+      }
+
+      function nextMonthEnd() {
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth() + 2, 0, 23, 59, 59, 999);
+      }
+
+      function currentMonthStart() {
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth(), 1, 0, 0, 0, 0);
+      }
+
+      function nextMonthStart() {
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth() + 1, 1, 0, 0, 0, 0);
+      }
+
+      function isWeekInRange(weekStartDate) {
+        const end = new Date(weekStartDate);
+        end.setDate(end.getDate() + 6);
+        end.setHours(23,59,59,999);
+        const curEnd = currentMonthEnd().getTime();
+        const nextEnd = nextMonthEnd().getTime();
+        const st = weekStartDate.getTime();
+        const et = end.getTime();
+        return (et >= currentMonthStart().getTime() && st <= curEnd) ||
+          (st <= nextEnd && et >= nextMonthStart().getTime());
+      }
+
+      function isInBookingWindow(date) {
+        const t = date.getTime();
+        const curS = currentMonthStart().getTime();
+        const curE = currentMonthEnd().getTime();
+        const nextS = nextMonthStart().getTime();
+        const nextE = nextMonthEnd().getTime();
+        return (t >= curS && t <= curE) || (t >= nextS && t <= nextE);
+      }
+
+      const DAY_LABELS = ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ש\''];
+      const DAY_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+      function render() {
+        const session = getSession();
+        const root = document.getElementById('root');
+        const coaches = getCoaches();
+        const players = getPlayers();
+
+        if (!session) {
+          root.innerHTML = `
+            <div class="app-wrap">
+              <h1 class="page-title">שיעורי טניס</h1>
+              <div class="card">
+                <h2>כניסה כמאמן</h2>
+                <p>בחר את עצמך כמאמן. תראה את הרשימת שחקנים והמערכת השבועית.</p>
+                <select id="coach-select">
+                  <option value="">בחר מאמן...</option>
+                  ${coaches.map(c => '<option value="' + c.id + '">' + c.name + '</option>').join('')}
+                </select>
+              </div>
+              <div class="card">
+                <h2>כניסה כשחקן</h2>
+                <p>בחר את שמך. תראה את המאמן שלך ואת המערכת שלו.</p>
+                <select id="player-select">
+                  <option value="">בחר את שמך...</option>
+                  ${players.map(p => {
+                    const coach = coaches.find(c => c.id === p.coachId);
+                    return '<option value="' + p.id + '">' + p.name + ' (מאמן: ' + (coach ? coach.name : p.coachId) + ')</option>';
+                  }).join('')}
+                </select>
+              </div>
+            </div>
+          `;
+          document.getElementById('coach-select').onchange = function() {
+            const id = this.value;
+            if (id) setSession({ role: 'coach', coachId: id }), render();
+          };
+          document.getElementById('player-select').onchange = function() {
+            const id = this.value;
+            if (!id) return;
+            const p = players.find(x => x.id === id);
+            if (p) setSession({ role: 'player', playerId: p.id, coachId: p.coachId }), render();
+          };
+          return;
+        }
+
+        const coachName = coaches.find(c => c.id === session.coachId)?.name || session.coachId;
+
+        if (session.role === 'coach') {
+          const myPlayers = players.filter(p => p.coachId === session.coachId);
+          root.innerHTML = `
+            <div class="app-wrap">
+              <nav class="nav">
+                <span class="nav-title">לוח מאמן — ${coachName}</span>
+                <div class="nav-links">
+                  <a href="#" data-page="dashboard">השחקנים שלי</a>
+                  <a href="#" data-page="schedule">מערכת שבועית</a>
+                  <button class="btn btn-sm signout" type="button">התנתק</button>
+                </div>
+              </nav>
+              <div id="content"></div>
+            </div>
+          `;
+          root.querySelector('.signout').onclick = () => { setSession(null); render(); };
+          root.querySelectorAll('[data-page]').forEach(a => {
+            a.onclick = e => { e.preventDefault(); showCoachPage(session.coachId, a.dataset.page, myPlayers, coaches, root); };
+          });
+          showCoachPage(session.coachId, 'dashboard', myPlayers, coaches, root);
+          return;
+        }
+
+        if (session.role === 'player') {
+          root.innerHTML = `
+            <div class="app-wrap">
+              <nav class="nav">
+                <span class="nav-title">המערכת של המאמן — ${coachName}</span>
+                <div class="nav-links">
+                  <a href="#" data-page="schedule">מערכת שבועית</a>
+                  <button class="btn btn-sm signout" type="button">התנתק</button>
+                </div>
+              </nav>
+              <div id="content"></div>
+            </div>
+          `;
+          root.querySelector('.signout').onclick = () => { setSession(null); render(); };
+          root.querySelector('[data-page="schedule"]').onclick = e => {
+            e.preventDefault();
+            showSchedule(session.coachId, null, false, coaches, players, root.querySelector('#content'));
+          };
+          showSchedule(session.coachId, null, false, coaches, players, root.querySelector('#content'));
+        }
+      }
+
+      function showCoachPage(coachId, page, myPlayers, coaches, root) {
+        const content = root.querySelector('#content');
+        if (page === 'dashboard') {
+          content.innerHTML = `
+            <div class="card">
+              <h2>השחקנים שלי</h2>
+              <ul id="player-list" style="list-style:none;padding:0;margin:0 0 1rem 0"></ul>
+              <div>
+                <input type="text" id="new-player-name" placeholder="שם שחקן חדש" />
+                <button type="button" class="btn btn-primary" id="add-player-btn">הוסף שחקן</button>
+              </div>
+            </div>
+          `;
+          const list = content.querySelector('#player-list');
+          function refreshList() {
+            const players = getPlayers().filter(p => p.coachId === coachId);
+            list.innerHTML = players.map(p => `
+              <li style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.25rem 0.5rem;border-radius:6px;background:var(--bg);border:1px solid var(--border)">
+                  <span style="width:10px;height:10px;border-radius:50%;background:${p.color || '#bdbdbd'}"></span>
+                  ${p.name}
+                </span>
+                <button type="button" class="btn btn-sm" data-edit="${p.id}">ערוך</button>
+                <button type="button" class="btn btn-sm" data-remove="${p.id}">הסר</button>
+              </li>
+            `).join('');
+            list.querySelectorAll('[data-edit]').forEach(btn => {
+              btn.onclick = () => {
+                const name = prompt('שם חדש', getPlayers().find(x => x.id === btn.dataset.edit).name);
+                if (name) {
+                  const arr = getPlayers();
+                  const i = arr.findIndex(x => x.id === btn.dataset.edit);
+                  if (i >= 0) arr[i].name = name;
+                  localStorage.setItem(STORAGE.players, JSON.stringify(arr));
+                  refreshList();
+                }
+              };
+            });
+            list.querySelectorAll('[data-remove]').forEach(btn => {
+              btn.onclick = () => {
+                const playerId = btn.dataset.remove;
+                const arr = getPlayers().filter(x => x.id !== playerId);
+                localStorage.setItem(STORAGE.players, JSON.stringify(arr));
+                const lessons = getLessons().filter(l => l.playerId !== playerId);
+                saveLessons(lessons);
+                refreshList();
+              };
+            });
+          }
+          refreshList();
+          const PASTEL = ['#b5d6b2', '#a8d4e6', '#f2c4b8', '#c9b8e8', '#ffe5b4', '#b8e8d4', '#e8c4d4', '#c4d4e8', '#d4e8c4', '#e8d4b8', '#d4b8e8', '#b8e8e8', '#f0d4c4', '#d4e0f0', '#e0f0d4'];
+          content.querySelector('#add-player-btn').onclick = () => {
+            const name = content.querySelector('#new-player-name').value.trim();
+            if (!name) return;
+            const arr = getPlayers();
+            const id = 'p-' + Date.now();
+            const count = arr.filter(p => p.coachId === coachId).length;
+            const color = PASTEL[count % PASTEL.length];
+            arr.push({ id, coachId, name, color });
+            localStorage.setItem(STORAGE.players, JSON.stringify(arr));
+            content.querySelector('#new-player-name').value = '';
+            refreshList();
+          };
+          return;
+        }
+        if (page === 'schedule') {
+          showSchedule(coachId, myPlayers, true, coaches, getPlayers(), content);
+        }
+      }
+
+      function showSchedule(coachId, myPlayers, canAdd, coaches, players, container) {
+        const list = getPlayers().filter(p => p.coachId === coachId);
+        let weekStartDate = weekStart(new Date());
+        const lessons = getLessons();
+
+        function getLessonsInRange(start, end) {
+          const st = start.getTime();
+          const en = end.getTime();
+          return lessons.filter(l => {
+            const t = new Date(l.start).getTime();
+            return l.coachId === coachId && t >= st && t <= en;
+          });
+        }
+
+        function renderSchedule() {
+          const rangeStart = new Date(weekStartDate);
+          rangeStart.setHours(0,0,0,0);
+          const rangeEnd = new Date(weekStartDate);
+          rangeEnd.setDate(rangeEnd.getDate() + 6);
+          rangeEnd.setHours(23,59,59,999);
+          const weekLessons = getLessonsInRange(rangeStart, rangeEnd);
+
+          const canPrev = isWeekInRange(addWeeks(weekStartDate, -1));
+          const canNext = isWeekInRange(addWeeks(weekStartDate, 1));
+
+          const endLabel = new Date(weekStartDate);
+          endLabel.setDate(endLabel.getDate() + 6);
+          const weekLabel = rangeStart.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' }) + ' – ' +
+            endLabel.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
+
+          let html = `
+            <div class="week-nav">
+              <button type="button" ${canPrev ? '' : 'disabled'} id="prev-week">שבוע קודם</button>
+              <strong>${weekLabel}</strong>
+              <button type="button" ${canNext ? '' : 'disabled'} id="next-week">שבוע הבא</button>
+            </div>
+            <p class="info">תצוגת שבוע (ראשון–שבת)</p>
+            <table>
+              <thead><tr>
+                <th>שעה</th>
+                ${[0,1,2,3,4,5,6].map(i => {
+                  const d = new Date(weekStartDate);
+                  d.setDate(d.getDate() + i);
+                  return '<th>' + DAY_LABELS[i] + '<br><span style="font-weight:normal">' + d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' }) + '</span></th>';
+                }).join('')}
+              </tr></thead>
+              <tbody>
+          `;
+
+          for (let hour = 7; hour <= 20; hour++) {
+            html += '<tr><td>' + hour + ':00</td>';
+            for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+              const slotStart = new Date(weekStartDate);
+              slotStart.setDate(slotStart.getDate() + dayIndex);
+              slotStart.setHours(hour, 0, 0, 0);
+              const slotEnd = new Date(slotStart);
+              slotEnd.setMinutes(slotEnd.getMinutes() + 60);
+              const st = slotStart.getTime();
+              const en = slotEnd.getTime();
+              const lesson = weekLessons.find(l => {
+                const lt = new Date(l.start).getTime();
+                const dur = (l.durationMinutes || 60) * 60 * 1000;
+                return lt < en && lt + dur > st;
+              });
+              if (lesson) {
+                const pl = list.find(x => x.id === lesson.playerId) || players.find(x => x.id === lesson.playerId);
+                const color = pl && pl.color ? pl.color : '#bdbdbd';
+                const isDark = (hex) => {
+                  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+                  if (!m) return false;
+                  const r = parseInt(m[1], 16) / 255, g = parseInt(m[2], 16) / 255, b = parseInt(m[3], 16) / 255;
+                  return (0.2126 * r + 0.7152 * g + 0.0722 * b) < 0.5;
+                };
+                const textColor = isDark(color) ? '#fff' : '#111';
+                const name = pl ? pl.name : lesson.playerId;
+                html += '<td class="slot" style="background:' + color + ';color:' + textColor + '">' + name + '</td>';
+              } else if (canAdd && isInBookingWindow(slotStart)) {
+                html += '<td class="slot"><button class="add-btn" type="button" data-day="' + dayIndex + '" data-hour="' + hour + '">+</button></td>';
+              } else {
+                html += '<td class="slot"></td>';
+              }
+            }
+            html += '</tr>';
+          }
+          html += '</tbody></table>';
+          container.innerHTML = html;
+
+          container.querySelector('#prev-week').onclick = () => {
+            weekStartDate = addWeeks(weekStartDate, -1);
+            renderSchedule();
+          };
+          container.querySelector('#next-week').onclick = () => {
+            weekStartDate = addWeeks(weekStartDate, 1);
+            renderSchedule();
+          };
+
+          container.querySelectorAll('.add-btn').forEach(btn => {
+            btn.onclick = () => {
+              const dayIndex = parseInt(btn.dataset.day, 10);
+              const hour = parseInt(btn.dataset.hour, 10);
+              const start = new Date(weekStartDate);
+              start.setDate(start.getDate() + dayIndex);
+              start.setHours(hour, 0, 0, 0);
+              if (!isInBookingWindow(start)) { alert('ניתן לקבוע שיעורים רק בחודש הנוכחי או הבא.'); return; }
+              const playerId = prompt('בחר שחקן (הזן מזהה או שם):', list[0]?.id || '');
+              if (!playerId) return;
+              const pl = list.find(p => p.id === playerId || p.name === playerId) || list.find(p => p.id === playerId);
+              const pid = pl ? pl.id : playerId;
+              const arr = getLessons();
+              arr.push({
+                id: 'l-' + Date.now(),
+                coachId,
+                playerId: pid,
+                start: start.toISOString(),
+                durationMinutes: 60
+              });
+              saveLessons(arr);
+              renderSchedule();
+            };
+          });
+        }
+
+        renderSchedule();
+      }
+
+      render();
+    })();
+  </script>
+  <p class="standalone-footer">
+    שיעורי טניס — גרסת HTML עצמאית · ללא שרת
+  </p>
+</body>
+</html>

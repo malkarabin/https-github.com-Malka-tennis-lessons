@@ -264,17 +264,6 @@
     "createdAt": "2026-03-15T22:02:34.150Z"
   },
   {
-    "id": "rec-1773612275395",
-    "coachId": "c1",
-    "playerId": "p-1773509301144",
-    "weekday": 3,
-    "hour": 10,
-    "endConditionType": "afterN",
-    "endConditionValue": 4,
-    "startDate": "2026-03-18",
-    "createdAt": "2026-03-15T22:04:35.407Z"
-  },
-  {
     "id": "rec-1773613091394",
     "coachId": "יוסי-חן-mms8ubg8",
     "playerId": "p-1773608754677",
